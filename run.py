@@ -6,7 +6,7 @@ import traceback
 import os
 
 # 程序版本
-VERSION = '1.2'
+VERSION = '1.3'
 config = {}
 tasks = []
 runtime=''
@@ -46,6 +46,7 @@ def api_check_in(host, cookie):
                 if res["message"] == 'Please Try Tomorrow':
                     success+=1
                     tasks.append({'uid':res['list'][0]['user_id'],'state':'√ 今日已经成功签到','days':int(float(res['list'][0]['balance']))})
+                tasks.append({'uid':'未知','state':f'？ Glados响应正常,但响应内容无法解析。\n 响应内容：{res["message"]}','days':0})
             except BaseException as e:
                 print(traceback.format_exc())
                 tasks.append({'uid':'未知','state':f'✘ 程序异常{e}','days':'-'})
@@ -61,7 +62,11 @@ def ding_send():
             dingMsg=dingMsg+f'「{t["uid"]}」\n状态:{t["state"]}\n天数:{t["days"]}\n'
         except:
             dingMsg=dingMsg+'**ERROR**\n'
-    dingMsg = dingMsg+f'\n当前版本:{VERSION}\n最新版本:{get_new_version()}'
+    version_remote=get_new_version()
+    if not VERSION==version_remote:
+        dingMsg = dingMsg+f'\n当前版本:{VERSION}\n⚠最新版本:{version_remote}'
+    else:
+        dingMsg = dingMsg+f'\n当前版本:{VERSION}\n最新版本:{version_remote}'
 
     res = requests.post(url=config["dingWebhook"],
                         data=json.dumps({"msgtype": "text", "text": {"content": dingMsg}}), headers={'Content-Type': 'application/json'})
