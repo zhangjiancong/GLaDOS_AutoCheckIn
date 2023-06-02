@@ -6,7 +6,7 @@ import traceback
 import os
 
 # 程序版本
-VERSION = '1.3'
+VERSION = '1.3.1'
 config = {}
 tasks = []
 runtime=''
@@ -38,14 +38,18 @@ def api_check_in(host, cookie):
             try:
                 if res["message"] == '没有权限':
                     tasks.append({'uid':'未知','state':f'✘ cookie填写有误','days':'-'})
+                    return
                 if res["message"] == 'oops, token error':
                     tasks.append({'uid':'未知','state':f'✘ token异常,请更新cookie','days':'-'})
+                    return
                 if res["message"] == 'Checkin! Get 1 Day':
                     success+=1
                     tasks.append({'uid':res['list'][0]['user_id'],'state':'√ 成功','days':int(float(res['list'][0]['balance']))})
+                    return
                 if res["message"] == 'Please Try Tomorrow':
                     success+=1
                     tasks.append({'uid':res['list'][0]['user_id'],'state':'√ 今日已经成功签到','days':int(float(res['list'][0]['balance']))})
+                    return
                 tasks.append({'uid':'未知','state':f'？ Glados响应正常,但响应内容无法解析。\n 响应内容：{res["message"]}','days':0})
             except BaseException as e:
                 print(traceback.format_exc())
