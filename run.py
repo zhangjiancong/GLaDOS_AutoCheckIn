@@ -127,7 +127,7 @@ def main():
             config=json.loads(os.environ.get('CONFIG'))
             getConfig = True
         except:
-            print('[ X ] 在读取环境变量中的配置时失败')
+            print('[ X ] 在读取环境变量中的配置时失败'
     finally:
         if(not getConfig):
             print('从本地文件和环境变量中拉取配置失败!')
