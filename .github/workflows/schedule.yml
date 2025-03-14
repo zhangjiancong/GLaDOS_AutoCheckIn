@@ -16,8 +16,6 @@ jobs:
         run: pip install requests
       - name: "拉取代码"
         uses: actions/checkout@v4
-        with:
-          ref: dev-action
       - name: "运行程序"
         run: python -u run.py
       
