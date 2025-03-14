@@ -45,7 +45,7 @@ def api_check_in(host, cookie):
                     success+=1
                     tasks.append({'uid':res['list'][0]['user_id'],'state':'√ 成功','days':int(float(res['list'][0]['balance']))})
                     return
-                if res["message"] == 'Please Try Tomorrow':
+                if res["message"] == 'Checkin Repeats! Please Try Tomorrow':
                     success+=1
                     tasks.append({'uid':res['list'][0]['user_id'],'state':'√ 今日已经成功签到','days':int(float(res['list'][0]['balance']))})
                     return
