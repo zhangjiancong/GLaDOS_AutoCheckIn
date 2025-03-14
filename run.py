@@ -16,7 +16,7 @@ def api_check_in(host, cookie):
     global success
     check_in_url = f"{host}/api/user/checkin"
     referer_url = f"{host}/console/checkin"
-    payload = {"token": "glados.network"}
+    payload = {"token": "glados.one"}
     with requests.post(
             check_in_url,
             headers={'authority': 'glados.rocks',
@@ -39,7 +39,7 @@ def api_check_in(host, cookie):
                     tasks.append({'uid':'未知','state':f'✘ cookie填写有误','days':'-'})
                     return
                 if res["message"] == 'oops, token error':
-                    tasks.append({'uid':'未知','state':f'✘ token异常,请更新cookie','days':'-'})
+                    tasks.append({'uid':'未知','state':f'✘ token异常,请联系程序作者更新token','days':'-'})
                     return
                 if res["message"] == 'Checkin! Get 1 Day':
                     success+=1
