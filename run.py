@@ -4,9 +4,8 @@ import json
 import time
 import traceback
 import os
-
 # 程序版本
-VERSION = '1.3.1'
+VERSION = '2.0'
 config = {}
 tasks = []
 runtime=''
@@ -123,8 +122,8 @@ def main():
         print('成功从配置文件中拉取配置')
         getConfig = True
     except:
+        config=json.loads(os.environ.get('CONFIG'))
         getConfig = True
-        pass
     finally:
         if(not getConfig):
             print('从本地文件和环境变量中拉取配置失败!')

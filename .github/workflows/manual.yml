@@ -1,8 +1,11 @@
-name: GLaDOS_AutoCheckIn_CheckIn
-on: [push]
+name: 签到-手动运行
+on: 
+  workflow_dispatch:
 jobs:
   CheckIn-Now:
     runs-on: ubuntu-latest
+    env:
+      CONFIG: ${{ vars.config }}
     steps: 
       - name: "安装python"
         uses: actions/setup-python@v5
@@ -12,6 +15,8 @@ jobs:
         run: pip install requests
       - name: "拉取代码"
         uses: actions/checkout@v4
-      - name: "运行CheckIn"
-        run: python run.py
+        with:
+          ref: dev-action
+      - name: "运行程序"
+        run: python -u run.py
       
