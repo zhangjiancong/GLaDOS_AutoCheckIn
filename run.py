@@ -114,6 +114,7 @@ def check_signed() -> bool:
 
 def main():
     global config
+    getConfig=False
     # 加载配置信息
     try:
         with open('config.json', 'r') as f:
@@ -122,8 +123,11 @@ def main():
         print('成功从配置文件中拉取配置')
         getConfig = True
     except:
-        config=json.loads(os.environ.get('CONFIG'))
-        getConfig = True
+        try:
+            config=json.loads(os.environ.get('CONFIG'))
+            getConfig = True
+        except:
+            print('[ X ] 在读取环境变量中的配置时失败')
     finally:
         if(not getConfig):
             print('从本地文件和环境变量中拉取配置失败!')
