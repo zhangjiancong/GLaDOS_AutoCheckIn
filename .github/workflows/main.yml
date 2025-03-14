@@ -1,0 +1,17 @@
+name: GLaDOS_AutoCheckIn_CheckIn
+on: [push]
+jobs:
+  CheckIn-Now:
+    runs-on: ubuntu-latest
+    steps: 
+      - name: "安装python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: "安装依赖项"
+        run: pip install requests
+      - name: "拉取代码"
+        uses: actions/checkout@v4
+      - name: "运行CheckIn"
+        run: python run.py
+      
