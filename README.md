@@ -1,13 +1,12 @@
 # GLaDOS_AutoCheckIn
 GLaDOS自动签到脚本 本地运行
 
-## 使用指引
-- 准备Python3环境
-- 执行 `pip install requests` 安装依赖
-- 填写 `config.json` 进行配置
-- 执行 `run.py`
-  
+## 更新历史
+V1.3 正式发布  
+V2.0 新增Github Action支持
+
 ## 配置设置
+**为了确保程序正常运行，建议您填写配置字段后进行json格式检查**  
 示例:  
 `
 {
@@ -20,9 +19,19 @@ GLaDOS自动签到脚本 本地运行
 `  
 
 解释:  
-**gladosHost**:GLaDOS有效域名  
+**gladosHost**:GLaDOS有效域名,可保持此值不变  
 **dingWebhook**:钉钉群机器人地址，安全方式选择关键词，填写英文句号`.`和横线`-`  
 **users**:GlaDOS账户cookie，此值接收一个数组允许使用多账号
 
-## 预期规划
-当前主线版本为V1，V2版本加入Action功能
+## 使用指引
+### 本地部署
+- 准备Python3环境
+- 执行 `pip install requests` 安装依赖
+- 将配置写入 `config.json` 文件中
+- 执行 `run.py`
+### Github Action
+- Fork本仓库至自己的账号中
+- 在`Settings`-`Secrets and variables`-`Actions`页面中调整至`Variables`选项卡,点击`New repository variable`
+- `Name`为`config`,`Value`为配置字段(见 配置设置 )
+- 点击`Add variable`确认添加
+- 您可在`Actions`进行手动运行,也可等待程序自动运行(10点，15点，19点)

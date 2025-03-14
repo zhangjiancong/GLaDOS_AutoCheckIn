@@ -1,7 +1,7 @@
 name: 签到-计划任务
 on: 
   schedule:
-    - cron: '0 * * * *'
+    - cron: '0 2,7,11 * * *'
 jobs:
   CheckIn-Now:
     runs-on: ubuntu-latest
