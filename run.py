@@ -41,7 +41,7 @@ def api_check_in(host, cookie):
                 if res["message"] == 'oops, token error':
                     tasks.append({'uid':'未知','state':f'✘ token异常,请联系程序作者更新token','days':'-'})
                     return
-                if res["message"] == 'Checkin! Get 1 Day':
+                if res["message"].startswith('Checkin!'):
                     success+=1
                     tasks.append({'uid':res['list'][0]['user_id'],'state':'√ 成功','days':int(float(res['list'][0]['balance']))})
                     return
