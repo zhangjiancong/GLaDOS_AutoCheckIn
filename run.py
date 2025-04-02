@@ -8,15 +8,10 @@ import os
 # 程序版本
 VERSION = "2.1"
 config = {}
-tasks = []
 runtime = ""
-success = 0
-NEED_SEND = False
 
 
 def api_check_in(host, cookie):
-    global success
-    global NEED_SEND
     check_in_url = f"{host}/api/user/checkin"
     referer_url = f"{host}/console/checkin"
     payload = {"token": "glados.one"}
@@ -41,44 +36,32 @@ def api_check_in(host, cookie):
             res = r.json()
             try:
                 if res["message"] == "没有权限":
-                    NEED_SEND = True
-                    tasks.append(
+                    ding_send(
                         {"uid": "未知", "state": f"✘ cookie填写有误", "days": "-"}
                     )
-                    return
+                    return False
                 if res["message"] == "oops, token error":
-                    NEED_SEND = True
-                    tasks.append(
+                    ding_send(
                         {
                             "uid": "未知",
                             "state": f"✘ token异常,请联系程序作者更新token",
                             "days": "-",
                         }
                     )
-                    return
+                    return False
                 if res["message"].startswith("Checkin!"):
-                    success += 1
-                    NEED_SEND = True
-                    tasks.append(
+                    ding_send(
                         {
                             "uid": res["list"][0]["user_id"],
                             "state": f"√ 成功 获得{res['points']}点",
                             "days": int(float(res["list"][0]["balance"])),
                         }
                     )
-                    return
+                    return True
                 if res["message"] == "Checkin Repeats! Please Try Tomorrow":
-                    success += 1
-                    tasks.append(
-                        {
-                            "uid": res["list"][0]["user_id"],
-                            "state": "√ 今日已经成功签到",
-                            "days": int(float(res["list"][0]["balance"])),
-                        }
-                    )
-                    return
-                NEED_SEND = True
-                tasks.append(
+                    print("[INFO] GLADOS返回 今日已成功签到")
+                    return True
+                ding_send(
                     {
                         "uid": "未知",
                         "state": f'？ Glados响应正常,但响应内容无法解析。\n 响应内容：{res["message"]}',
@@ -87,9 +70,9 @@ def api_check_in(host, cookie):
                 )
             except BaseException as e:
                 print(traceback.format_exc())
-                tasks.append({"uid": "未知", "state": f"✘ 程序异常{e}", "days": "-"})
+                ding_send({"uid": "未知", "state": f"✘ 程序异常{e}", "days": "-"})
         else:
-            tasks.append(
+            ding_send(
                 {
                     "uid": "未知",
                     "state": f"网络响应异常{r.status_code},可能是网络连接失败.",
@@ -98,14 +81,10 @@ def api_check_in(host, cookie):
             )
 
 
-def ding_send():
-    global tasks
-    dingMsg = f"--- GLaDOS_AutoCheckIn ---\n开始时间:{runtime}\n成功率:{round(success/len(config['users'])*100)}%\n\n"
-    for t in tasks:
-        try:
-            dingMsg = dingMsg + f'「{t["uid"]}」\n状态:{t["state"]}\n天数:{t["days"]}\n'
-        except:
-            dingMsg = dingMsg + "**ERROR**\n"
+def ding_send(msg):
+    print(f"[INFO] 签到结果:{msg}")
+    dingMsg = f"--- GLaDOS_AutoCheckIn ---\n开始时间:{runtime}\n\n"
+    dingMsg = dingMsg + f'「{msg["uid"]}」\n状态:{msg["state"]}\n天数:{msg["days"]}\n'
     version_remote = get_new_version()
     if not VERSION == version_remote:
         dingMsg = dingMsg + f"\n当前版本:{VERSION}\n⚠最新版本:{version_remote}"
@@ -113,7 +92,7 @@ def ding_send():
         dingMsg = dingMsg + f"\n当前版本:{VERSION}\n最新版本:{version_remote}"
 
     res = requests.post(
-        url=config["dingWebhook"],
+        url=config["dingWebhook"],  # type: ignore
         data=json.dumps({"msgtype": "text", "text": {"content": dingMsg}}),
         headers={"Content-Type": "application/json"},
     )
@@ -129,7 +108,7 @@ def ding_send():
 
 def ding_send_errors(e):
     res = requests.post(
-        url=config["dingWebhook"],
+        url=config["dingWebhook"],  # type: ignore
         data=json.dumps({"msgtype": "text", "text": {"content": e}}),
         headers={"Content-Type": "application/json"},
     )
@@ -178,38 +157,37 @@ def main():
         with open("config.json", "r") as f:
             config = f.read()
             config = json.loads(config)
-        print("成功从配置文件中拉取配置")
+        print("[INFO] 成功从配置文件中拉取配置")
         getConfig = True
+    except ValueError:
+        print("[ X ] 在读取配置文件时,json不合法")
     except:
         try:
-            config = json.loads(os.environ.get("CONFIG"))
+            config = json.loads(os.environ.get("CONFIG"))  # type: ignore
             getConfig = True
-        except:
-            print("[ X ] 在读取环境变量中的配置时失败")
+        except ValueError:
+            print("[ X ] 在读取环境变量中的配置时,json不合法")
+        except Exception as e:
+            print(f"[ X ] 在读取环境变量中的配置时失败:{e}")
     finally:
         if not getConfig:
-            print("从本地文件和环境变量中拉取配置失败!")
+            print("[ X ] 从本地文件和环境变量中拉取配置失败!")
             ding_send_errors(
                 "从本地文件和环境变量中拉取配置失败.\n请建立配置文件或将配置填入环境变量!"
             )
 
     # 检查今日是否已签到
     if check_signed():
-        print("发现签到lock文件,今日已签")
+        print("[WARN] 发现签到lock文件,今日已签")
         sys.exit("local:is signed")
     else:
-        print("未发现签到lock文件或今日未签到")
+        print("[INFO] 未发现签到lock文件或今日未签到")
 
     # 开始签到
     try:
-        doing = 1
         print("\n=== 开始签到 ===")
-        for t in config["users"]:
-            print(f'正在进行第{doing}个 共{len(config["users"])}个')
-            api_check_in(config["gladosHost"], t)
-            doing += 1
-        ding_send()
-        if success == len(config["users"]):
+        checkin_issuccess = api_check_in(config["gladosHost"], config["users"])  # type: ignore
+        if checkin_issuccess:
             record_signed()
     except BaseException:
         print(traceback.format_exc())

@@ -4,6 +4,7 @@ GLaDOS自动签到脚本 本地运行
 ## 更新历史
 V1.3 正式发布  
 V2.0 新增Github Action支持
+V2.1 优化钉钉消息发送逻辑,仅在签到成功和异常时发送消息;取消了多账户支持
 
 ## 配置设置
 **为了确保程序正常运行，建议您填写配置字段后进行json格式检查**  
@@ -12,16 +13,14 @@ V2.0 新增Github Action支持
 {
     "gladosHost": "https://glados.rocks",
     "dingWebhook": "钉钉webhook地址",
-    "users": [
-        "GlaDOS cookie"
-    ]
+    "users": "GlaDOS cookie"
 }
 `  
 
 解释:  
 **gladosHost**:GLaDOS有效域名,可保持此值不变  
 **dingWebhook**:钉钉群机器人地址，安全方式选择关键词，填写英文句号`.`和横线`-`  
-**users**:GlaDOS账户cookie，此值接收一个数组允许使用多账号
+**users**:GlaDOS账户cookie
 
 ## 使用指引
 ### 本地部署
